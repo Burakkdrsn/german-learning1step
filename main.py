@@ -7,6 +7,10 @@ services/ klasöründeki dosyalar yapacak.
 from typing import Callable
 
 import config
+import database
+from models import Difficulty, Level, TaskCategory
+from services import task_service
+
 
 # Bir menü seçeneği seçilince çalışacak fonksiyonun türü:
 # argüman almayan ve hiçbir şey döndürmeyen fonksiyon
@@ -23,18 +27,66 @@ def show_coming_soon(feature_name: str, phase_number: int) -> None:
 # --- Menü seçeneklerinin fonksiyonları ---
 # Şimdilik hepsi yer tutucu. İlerleyen aşamalarda gerçek işleri yapacaklar.
 
+def _choose(enum_class, label: str):
+    """Kullanıcıya numaralı liste gösterir, seçilen enum değerini döndürür."""
+    items = list(enum_class)
+    print(f"\n{label}:")
+    for number, item in enumerate(items, start=1):
+        print(f"  {number}. {item.value}")
+
+    raw = input("Seçim (numara): ").strip()
+    if raw.isdigit() and 1 <= int(raw) <= len(items):
+        return items[int(raw) - 1]
+    return None
+
+
 def show_todays_tasks() -> None:
-    show_coming_soon("Today's Tasks", 4)
+    tasks = task_service.get_tasks_by_date()
+    if not tasks:
+        print("\nBugün için görev yok.")
+        return
+
+    print("\n--- Bugünün Görevleri ---")
+    for task in tasks:
+        mark = "x" if task["is_completed"] else " "
+        print(
+            f"[{mark}] {task['id']}. {task['title']} "
+            f"({task['category']}, {task['level']}, {task['difficulty']})"
+        )
 
 
 def add_task() -> None:
-    show_coming_soon("Add Task", 3)
+    title = input("\nGörev başlığı: ").strip()
+    if not title:
+        print("Başlık boş olamaz.")
+        return
+
+    category = _choose(TaskCategory, "Kategori")
+    level = _choose(Level, "Seviye")
+    difficulty = _choose(Difficulty, "Zorluk")
+
+    if category is None or level is None or difficulty is None:
+        print("Geçersiz seçim, görev eklenmedi.")
+        return
+
+    task_id = task_service.add_task(title, category, level, difficulty)
+    print(f"\nGörev eklendi (id: {task_id}).")
 
 
 def complete_task() -> None:
-    show_coming_soon("Complete Task", 3)
+    show_todays_tasks()
 
+    raw = input("\nTamamlanan görevin numarası: ").strip()
+    if not raw.isdigit():
+        print("Geçerli bir numara gir.")
+        return
 
+    if task_service.complete_task(int(raw)):
+        print("Görev tamamlandı.")
+    else:
+        print("Görev bulunamadı ya da zaten tamamlanmış.")
+
+        
 def show_vocabulary() -> None:
     show_coming_soon("Vocabulary", 5)
 
@@ -116,4 +168,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    database.init_db()
     main()
