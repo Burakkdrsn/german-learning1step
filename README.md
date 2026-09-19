@@ -8,4 +8,4 @@ Almanca öğrenme sürecini (A1 → C1) takip eden Python terminal uygulaması.
 
 ## Durum
 
-- [x] PHASE 1: Temel proje yapısı
+- [x] PHASE 1: Temel proje yapısı# german-learning1step
