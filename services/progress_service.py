@@ -1,0 +1,1 @@
+"""İlerleme yüzdesi hesaplamaları. PHASE 7'de doldurulacak."""
