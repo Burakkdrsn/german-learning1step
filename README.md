@@ -1,110 +1,130 @@
 # German Learning Tracker
 
-Almanca öğrenme sürecini takip etmek için yazılmış terminal tabanlı bir uygulama.
-Günlük görevler, kelime tekrarı, gramer konuları, ilerleme ve seri (streak) takibi
-tek bir menüden yönetilir. Tüm veriler yerel bir SQLite dosyasında saklanır.
+**English** | [Türkçe](README.tr.md)
 
-## Özellikler
+A terminal application for tracking German learning progress. Daily tasks,
+spaced-repetition vocabulary review, grammar topics, progress statistics, and
+streak tracking are all managed from a single menu. All data is stored locally
+in a SQLite database.
 
-| Menü             | Özellik                                                     |
-| ---------------- | ----------------------------------------------------------- |
-| 1. Today's Tasks | Bugünün görevlerini listeler                                |
-| 2. Add Task      | Kategori, seviye ve zorluk seçerek görev ekler              |
-| 3. Complete Task | Görevi tamamlandı olarak işaretler                          |
-| 4. Vocabulary    | Kelime ekleme, listeleme ve aralıklı tekrar                 |
-| 5. Grammar       | Seviyeye göre gramer konuları, tamamlama ve seviye özeti    |
-| 6. Progress      | Günlük/haftalık görev sayısı ve kelime ilerlemesi           |
-| 7. Statistics    | Kategori/seviye dağılımı, tekrar başarı oranı, en aktif gün |
-| 8. Streak        | Şu anki ve en uzun üst üste çalışılan gün sayısı            |
-| 9. Settings      | Günlük kelime tekrar limitini değiştirme                    |
-| 10. Exit         | Çıkış                                                       |
+## Screenshots
 
-### Kelime tekrarı (aralıklı tekrar)
+**Main menu**
 
-Bir kelimeyi hatırladıkça bir sonraki tekrar aralığı uzar: 1, 3, 7, 14 ve 30 gün.
-Hatırlanmayan kelime ertesi gün tekrar gelir. Günlük tekrar sayısı bir limitle
-sınırlanır (varsayılan 20, Settings menüsünden değiştirilebilir). Yapılan her
-tekrar `review_log` tablosuna kaydedilir.
+<img src="screenshots/menu.png" width="500" alt="Main menu">
+
+**Vocabulary review**
+
+<img src="screenshots/vocabulary.png" width="500" alt="Vocabulary review">
+
+**Statistics**
+
+<img src="screenshots/progress.png" width="500" alt="advancements">
+
+## Features
+
+| Menu             | Feature                                                         |
+| ---------------- | --------------------------------------------------------------- |
+| 1. Today's Tasks | Lists today's tasks                                             |
+| 2. Add Task      | Adds a task with a category, level, and difficulty              |
+| 3. Complete Task | Marks a task as completed                                       |
+| 4. Vocabulary    | Add and list words, plus spaced-repetition review               |
+| 5. Grammar       | Grammar topics by level, completion tracking, and level summary |
+| 6. Progress      | Daily and weekly task counts and vocabulary progress            |
+| 7. Statistics    | Category and level breakdown, recall rate, most active day      |
+| 8. Streak        | Current and longest streak of consecutive study days            |
+| 9. Settings      | Change the daily vocabulary review limit                        |
+| 10. Exit         | Quit the app                                                    |
+
+### Vocabulary review (spaced repetition)
+
+Each time you recall a word correctly, its next review interval grows: 1, 3, 7,
+14, and then 30 days. A word you fail to recall comes back the next day. The
+number of reviews per day is capped by a limit (default 20, adjustable in the
+Settings menu). Every review is recorded in the `review_log` table.
 
 ### Streak
 
-Bir gün, o gün en az bir görev tamamlandıysa **ya da** en az bir kelime tekrarı
-yapıldıysa çalışılmış sayılır. Bugün henüz çalışmadıysan seri bozulmaz, dünden
-geriye doğru sayılır.
+A day counts as a study day if at least one task was completed **or** at least
+one vocabulary review was done. If you have not studied yet today, your streak
+is not broken; counting continues from yesterday.
 
-## Kurulum ve çalıştırma
+## Getting started
 
-Gereksinimler: **Python 3.9 veya üstü**. Harici paket gerekmez, sadece Python'un
-kendi kütüphaneleri kullanılır.
+Requirements: **Python 3.9 or newer**. No external packages are needed, the app
+uses only the Python standard library.
 
 ```bash
 python3 main.py
 ```
 
-İlk açılışta `data/german_learning.db` veritabanı ve tablolar kendiliğinden oluşur.
+On first launch, the `data/german_learning.db` database and its tables are
+created automatically.
 
-### Başlangıç verilerini yükleme (isteğe bağlı)
+### Loading starter data (optional)
 
-A1, A2 ve B1 seviyeleri için hazır kelime ve gramer listelerini yüklemek için:
+To load ready-made vocabulary and grammar lists for levels A1, A2, and B1:
 
 ```bash
-python3 seed_vocabulary.py   # yaklaşık 190 kelime
-python3 seed_grammar.py      # 44 gramer konusu
+python3 seed_vocabulary.py   # about 190 words
+python3 seed_grammar.py      # 44 grammar topics
 ```
 
-İki betik de birden fazla kez çalıştırılabilir, zaten kayıtlı olanlar atlanır.
+Both scripts are safe to run more than once; entries that already exist are
+skipped.
 
-## Proje yapısı
+## Project structure
 
 ```
 .
-├── main.py                  # Terminal menüsü ve kullanıcı etkileşimi
-├── config.py                # Sabit ayarlar (yollar, başlık, varsayılan limit)
-├── database.py              # SQLite bağlantısı ve tablo oluşturma
-├── models.py                # Ortak Enum'lar: Level, TaskCategory, Difficulty
-├── seed_vocabulary.py       # Başlangıç kelimelerini yükler
-├── seed_grammar.py          # Başlangıç gramer konularını yükler
-├── data/                    # SQLite veritabanı dosyası burada oluşur
+├── main.py                  # Terminal menu and user interaction
+├── config.py                # Constants (paths, title, default limit)
+├── database.py              # SQLite connection and table creation
+├── models.py                # Shared enums: Level, TaskCategory, Difficulty
+├── seed_vocabulary.py       # Loads starter vocabulary
+├── seed_grammar.py          # Loads starter grammar topics
+├── screenshots/             # Screenshots used in this README
+├── data/                    # The SQLite database file is created here
 └── services/
-    ├── task_service.py          # Görev ekleme, listeleme, tamamlama
-    ├── vocabulary_service.py    # Kelime ekleme, listeleme, aralıklı tekrar
-    ├── grammar_service.py       # Gramer konuları ve seviye özeti
-    ├── review_service.py        # Kelime tekrar geçmişi (review_log)
-    ├── progress_service.py      # Görev ve kelime ilerleme özeti
-    ├── statistics_service.py    # İstatistik hesapları
-    ├── streak_service.py        # Seri hesapları
-    └── settings_service.py      # Kalıcı ayarlar
+    ├── task_service.py          # Add, list, and complete tasks
+    ├── vocabulary_service.py    # Words and spaced-repetition scheduling
+    ├── grammar_service.py       # Grammar topics and level summary
+    ├── review_service.py        # Vocabulary review history (review_log)
+    ├── progress_service.py      # Task and vocabulary progress summary
+    ├── statistics_service.py    # Statistics calculations
+    ├── streak_service.py        # Streak calculations
+    └── settings_service.py      # Persistent settings
 ```
 
-Tasarım kuralı: `main.py` sadece menüyü yönetir ve kullanıcıdan girdi alıp ekrana
-yazdırır. Veritabanı işlerinin hepsi `services/` klasöründeki dosyalarda yapılır.
+Design rule: `main.py` only handles the menu, reads user input, and prints
+output. All database work lives in the files under `services/`.
 
-## Veritabanı tabloları
+## Database tables
 
-| Tablo            | Amaç                                                          |
-| ---------------- | ------------------------------------------------------------- |
-| `tasks`          | Günlük görevler (kategori, seviye, zorluk, tarih, tamamlanma) |
-| `vocabulary`     | Kelimeler, tekrar sayısı ve bir sonraki tekrar tarihi         |
-| `grammar_topics` | Seviyeye göre gramer konuları ve tamamlanma durumu            |
-| `review_log`     | Yapılan her kelime tekrarının kaydı                           |
-| `settings`       | Kalıcı ayarlar (ör. günlük tekrar limiti)                     |
+| Table            | Purpose                                                     |
+| ---------------- | ----------------------------------------------------------- |
+| `tasks`          | Daily tasks (category, level, difficulty, date, completion) |
+| `vocabulary`     | Words, review count, and next review date                   |
+| `grammar_topics` | Grammar topics by level and their completion status         |
+| `review_log`     | A record of every vocabulary review                         |
+| `settings`       | Persistent settings (for example, the daily review limit)   |
 
-Seviyeler (A1-C1), görev kategorileri ve zorluk dereceleri `models.py` içindeki
-Enum'lardan gelir ve veritabanında CHECK kısıtı olarak da uygulanır.
+Levels (A1 to C1), task categories, and difficulty values come from the enums
+in `models.py` and are also enforced in the database as CHECK constraints.
 
-## Geliştirme aşamaları
+## Development phases
 
-- **PHASE 1:** Menü iskeleti
-- **PHASE 2:** SQLite veritabanı
-- **PHASE 3:** Görev sistemi
-- **PHASE 4-5:** Kelime sistemi, progress ve streak
-- **PHASE 6:** Gramer sistemi
-- **PHASE 7:** Tekrar geçmişi ve istatistikler
-- **PHASE 8:** Ayarlar
+- **PHASE 1:** Menu skeleton
+- **PHASE 2:** SQLite database
+- **PHASE 3:** Task system
+- **PHASE 4-5:** Vocabulary, progress, and streak
+- **PHASE 6:** Grammar system
+- **PHASE 7:** Review history and statistics
+- **PHASE 8:** Settings
 
-## Fikirler ve eksikler
+## Ideas and known gaps
 
-- Görev ve kelime silme/düzenleme
-- Kelime arama
-- Veritabanı yedekleme
-- B2 ve C1 için kelime ve gramer listeleri
+- Delete and edit tasks and words
+- Word search
+- Database backup
+- Vocabulary and grammar lists for B2 and C1
