@@ -13,6 +13,7 @@ from services import (
     grammar_service,
     progress_service,
     review_service,
+    statistics_service,
     streak_service,
     task_service,
     vocabulary_service,
@@ -262,7 +263,34 @@ def show_progress() -> None:
 
 
 def show_statistics() -> None:
-    show_coming_soon("Statistics", 8)
+    by_category = statistics_service.get_task_stats_by_category()
+    by_level = statistics_service.get_task_stats_by_level()
+    reviews = statistics_service.get_review_stats()
+    best_day = statistics_service.get_most_active_day()
+
+    print("\n--- İstatistikler ---")
+
+    if by_category:
+        print("\nKategoriye göre görevler (tamamlanan/toplam):")
+        for row in by_category:
+            print(f"  {row['category']}: {row['done']}/{row['total']}")
+
+        print("\nSeviyeye göre görevler (tamamlanan/toplam):")
+        for row in by_level:
+            print(f"  {row['level']}: {row['done']}/{row['total']}")
+    else:
+        print("\nHenüz görev yok.")
+
+    print("\nKelime tekrarı:")
+    if reviews["total"]:
+        print(f"  Toplam tekrar: {reviews['total']}")
+        print(f"  Doğru hatırlama: {reviews['remembered']} (%{reviews['percent']})")
+    else:
+        print("  Henüz tekrar kaydı yok.")
+
+    if best_day:
+        day, count = best_day
+        print(f"\nEn aktif gün: {day} ({count} çalışma)")
 
 
 def show_streak() -> None:
