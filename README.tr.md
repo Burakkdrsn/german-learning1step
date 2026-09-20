@@ -18,7 +18,7 @@ tek bir menüden yönetilir. Tüm veriler yerel bir SQLite dosyasında saklanır
 
 **İstatistikler**
 
-<img src="screenshots/statistics.png" width="500" alt="İstatistikler">
+<img src="screenshots/progress.png" width="500" alt="advancements">
 
 ## Özellikler
 
