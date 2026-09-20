@@ -10,6 +10,7 @@ import config
 import database
 from models import Difficulty, Level, TaskCategory
 from services import (
+    grammar_service,
     progress_service,
     streak_service,
     task_service,
@@ -164,9 +165,70 @@ def show_vocabulary() -> None:
     elif choice != "0":
         print("Geçersiz seçim.")
 
+def _print_grammar_topics(level=None) -> None:
+    topics = grammar_service.get_topics(level)
+    if not topics:
+        print("\nKonu bulunamadı.")
+        return
+
+    print("\n--- Gramer Konuları ---")
+    current_level = None
+    for topic in topics:
+        if topic["level"] != current_level:
+            current_level = topic["level"]
+            print(f"\n[{current_level}]")
+        mark = "x" if topic["is_completed"] else " "
+        print(f"  [{mark}] {topic['id']}. {topic['title']}")
+
+        
+def _complete_grammar_topic() -> None:
+    raw = input("\nTamamlanan konunun numarası: ").strip()
+    if not raw.isdigit():
+        print("Geçerli bir numara gir.")
+        return
+
+    if grammar_service.complete_topic(int(raw)):
+        print("Konu tamamlandı.")
+    else:
+        print("Konu bulunamadı ya da zaten tamamlanmış.")
+
+
+def _show_grammar_summary() -> None:
+    rows = grammar_service.get_level_summary()
+    if not rows:
+        print("\nHenüz gramer konusu yok.")
+        return
+
+    print("\n--- Gramer Özeti ---")
+    for row in rows:
+        print(f"{row['level']}: {row['done']}/{row['total']} konu tamamlandı")
+
 
 def show_grammar() -> None:
-    show_coming_soon("Grammar", 6)
+
+    print("\n--- Gramer ---")
+    print("1. Tüm konuları listele")
+    print("2. Bir seviyenin konularını listele")
+    print("3. Konuyu tamamla")
+    print("4. Seviye özeti")
+    print("0. Geri")
+
+    choice = input("Seçim: ").strip()
+    if choice == "1":
+        _print_grammar_topics()
+    elif choice == "2":
+        level = _choose(Level, "Seviye")
+        if level is None:
+            print("Geçersiz seçim.")
+        else:
+            _print_grammar_topics(level)
+    elif choice == "3":
+        _print_grammar_topics()
+        _complete_grammar_topic()
+    elif choice == "4":
+        _show_grammar_summary()
+    elif choice != "0":
+        print("Geçersiz seçim.")
 
 
 def show_progress() -> None:
