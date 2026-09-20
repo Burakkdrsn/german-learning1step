@@ -127,12 +127,17 @@ def _list_words() -> None:
 
 
 def _review_words() -> None:
-    words = vocabulary_service.get_due_words()
-    if not words:
+    total_due = vocabulary_service.count_due_words()
+    if total_due == 0:
         print("\nBugün tekrar edilecek kelime yok.")
         return
 
-    print(f"\nBugün tekrar edilecek {len(words)} kelime var.")
+    words = vocabulary_service.get_due_words(config.DAILY_REVIEW_LIMIT)
+    print(
+        f"\nTekrar bekleyen {total_due} kelime var, "
+        f"şimdi {len(words)} tanesini çalışacaksın."
+    )
+
     for word in words:
         print(f"\nAlmanca: {word['german']}")
         input("Anlamını düşün, göstermek için Enter'a bas...")
@@ -180,7 +185,7 @@ def _print_grammar_topics(level=None) -> None:
         mark = "x" if topic["is_completed"] else " "
         print(f"  [{mark}] {topic['id']}. {topic['title']}")
 
-        
+
 def _complete_grammar_topic() -> None:
     raw = input("\nTamamlanan konunun numarası: ").strip()
     if not raw.isdigit():

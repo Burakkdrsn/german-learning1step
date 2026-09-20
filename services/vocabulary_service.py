@@ -53,20 +53,36 @@ def get_all_words() -> list[sqlite3.Row]:
         return cursor.fetchall()
 
 
-def get_due_words() -> list[sqlite3.Row]:
-    """Tekrar tarihi bugün ya da geçmiş olan kelimeleri döndürür."""
+def get_due_words(limit: Optional[int] = None) -> list[sqlite3.Row]:
+    """Tekrar tarihi bugün ya da geçmiş olan kelimeleri döndürür.
+
+    limit verilirse en fazla o kadar kelime gelir (en eski tarihliler önce).
+    """
+    today = date.today().isoformat()
+
+    query = """
+        SELECT * FROM vocabulary
+        WHERE next_review_date <= ?
+        ORDER BY next_review_date, id
+    """
+    params: tuple = (today,)
+    if limit is not None:
+        query += " LIMIT ?"
+        params = (today, limit)
+
+    with get_connection() as conn:
+        return conn.execute(query, params).fetchall()
+
+
+def count_due_words() -> int:
+    """Tekrar tarihi bugün ya da geçmiş olan kelime sayısını döndürür."""
     today = date.today().isoformat()
 
     with get_connection() as conn:
-        cursor = conn.execute(
-            """
-            SELECT * FROM vocabulary
-            WHERE next_review_date <= ?
-            ORDER BY next_review_date, id
-            """,
+        return conn.execute(
+            "SELECT COUNT(*) FROM vocabulary WHERE next_review_date <= ?",
             (today,),
-        )
-        return cursor.fetchall()
+        ).fetchone()[0]
 
 
 def review_word(word_id: int, remembered: bool) -> bool:

@@ -16,3 +16,6 @@ DATABASE_PATH: Path = DATA_DIR / "german_learning.db"
 # Terminal görünümü
 APP_TITLE: str = "GERMAN LEARNING TRACKER"
 MENU_WIDTH: int = 36
+
+# Bir kelime tekrar seansında gösterilecek en fazla kelime sayısı
+DAILY_REVIEW_LIMIT: int = 20
