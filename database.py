@@ -79,6 +79,10 @@ def init_db() -> None:
             """
         )
 
+
+
+        
+
         conn.execute(
             f"""
             CREATE TABLE IF NOT EXISTS grammar_topics (
@@ -91,6 +95,10 @@ def init_db() -> None:
             )
             """
         )
+
+
+
+
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS review_log (
@@ -99,6 +107,17 @@ def init_db() -> None:
                 review_date TEXT NOT NULL,
                 reviewed_at TEXT NOT NULL,
                 remembered  INTEGER NOT NULL
+            )
+            """
+        )
+
+
+
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS settings (
+                key   TEXT PRIMARY KEY,
+                value TEXT NOT NULL
             )
             """
         )

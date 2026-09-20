@@ -13,6 +13,7 @@ from services import (
     grammar_service,
     progress_service,
     review_service,
+    settings_service,
     statistics_service,
     streak_service,
     task_service,
@@ -129,7 +130,7 @@ def _list_words() -> None:
 
 
 def _review_words() -> None:
-    limit = config.DAILY_REVIEW_LIMIT
+    limit = settings_service.get_daily_review_limit()
     remaining = limit - review_service.count_reviews_today()
     if remaining <= 0:
         print(f"\nBugünkü {limit} kelimelik limitini doldurdun. Yarın devam!")
@@ -306,7 +307,23 @@ def show_streak() -> None:
 
 
 def show_settings() -> None:
-    show_coming_soon("Settings", 2)
+    current = settings_service.get_daily_review_limit()
+    low = settings_service.MIN_REVIEW_LIMIT
+    high = settings_service.MAX_REVIEW_LIMIT
+
+    print("\n--- Ayarlar ---")
+    print(f"1. Günlük kelime tekrar limiti: {current}")
+    print("0. Geri")
+
+    choice = input("Seçim: ").strip()
+    if choice == "1":
+        raw = input(f"Yeni limit ({low}-{high}): ").strip()
+        if raw.isdigit() and settings_service.set_daily_review_limit(int(raw)):
+            print(f"\nGünlük limit {int(raw)} olarak kaydedildi.")
+        else:
+            print(f"\nGeçersiz değer. {low} ile {high} arasında bir sayı gir.")
+    elif choice != "0":
+        print("Geçersiz seçim.")
 
 
 # Menü tablosu: seçim numarası -> (görünen isim, çalışacak fonksiyon)
