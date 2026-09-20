@@ -9,7 +9,13 @@ from typing import Callable
 import config
 import database
 from models import Difficulty, Level, TaskCategory
-from services import task_service
+from services import (
+    progress_service,
+    streak_service,
+    task_service,
+    vocabulary_service,
+)
+
 
 
 # Bir menü seçeneği seçilince çalışacak fonksiyonun türü:
@@ -86,9 +92,77 @@ def complete_task() -> None:
     else:
         print("Görev bulunamadı ya da zaten tamamlanmış.")
 
-        
+
+def _add_word() -> None:
+    german = input("\nAlmanca kelime: ").strip()
+    turkish = input("Türkçe anlamı: ").strip()
+    if not german or not turkish:
+        print("Kelime ve anlamı boş olamaz.")
+        return
+
+    level = _choose(Level, "Seviye")
+    if level is None:
+        print("Geçersiz seçim, kelime eklenmedi.")
+        return
+
+    example = input("Örnek cümle (boş bırakabilirsin): ").strip() or None
+
+    word_id = vocabulary_service.add_word(german, turkish, level, example)
+    if word_id is None:
+        print("\nBu kelime bu seviyede zaten kayıtlı.")
+    else:
+        print(f"\nKelime eklendi (id: {word_id}).")
+
+
+def _list_words() -> None:
+    words = vocabulary_service.get_all_words()
+    if not words:
+        print("\nHenüz kelime yok.")
+        return
+
+    print(f"\n--- Kelimeler ({len(words)}) ---")
+    for word in words:
+        print(f"[{word['level']}] {word['german']} = {word['turkish']}")
+
+
+def _review_words() -> None:
+    words = vocabulary_service.get_due_words()
+    if not words:
+        print("\nBugün tekrar edilecek kelime yok.")
+        return
+
+    print(f"\nBugün tekrar edilecek {len(words)} kelime var.")
+    for word in words:
+        print(f"\nAlmanca: {word['german']}")
+        input("Anlamını düşün, göstermek için Enter'a bas...")
+        print(f"Türkçe: {word['turkish']}")
+        if word["example"]:
+            print(f"Örnek: {word['example']}")
+
+        answer = input("Hatırladın mı? (e/h, çıkmak için q): ").strip().lower()
+        if answer == "q":
+            break
+        vocabulary_service.review_word(word["id"], answer == "e")
+
+    print("\nTekrar bitti.")
+
+
 def show_vocabulary() -> None:
-    show_coming_soon("Vocabulary", 5)
+    print("\n--- Kelimeler ---")
+    print("1. Kelime ekle")
+    print("2. Tüm kelimeleri listele")
+    print("3. Bugünün tekrarı")
+    print("0. Geri")
+
+    choice = input("Seçim: ").strip()
+    if choice == "1":
+        _add_word()
+    elif choice == "2":
+        _list_words()
+    elif choice == "3":
+        _review_words()
+    elif choice != "0":
+        print("Geçersiz seçim.")
 
 
 def show_grammar() -> None:
@@ -96,7 +170,18 @@ def show_grammar() -> None:
 
 
 def show_progress() -> None:
-    show_coming_soon("Progress", 7)
+    tasks = progress_service.get_task_progress()
+    vocab = progress_service.get_vocabulary_progress()
+
+    print("\n--- İlerleme ---")
+    print(f"Bugün: {tasks['today_completed']}/{tasks['today_total']} görev tamamlandı")
+    print(f"Son 7 gün: {tasks['week_completed']} görev tamamlandı")
+    print(f"Toplam: {tasks['completed']}/{tasks['total']} görev")
+
+    print(f"\nKelimeler: {vocab['total']} kayıtlı")
+    print(f"Bugün tekrar edilecek: {vocab['due']}")
+    print(f"İyi öğrenilmiş (3+ doğru tekrar): {vocab['mastered']}")
+
 
 
 def show_statistics() -> None:
@@ -104,7 +189,15 @@ def show_statistics() -> None:
 
 
 def show_streak() -> None:
-    show_coming_soon("Streak", 9)
+
+    current = streak_service.get_current_streak()
+    longest = streak_service.get_longest_streak()
+    total_days = streak_service.get_total_study_days()
+
+    print("\n--- Streak ---")
+    print(f"Şu anki seri: {current} gün")
+    print(f"En uzun seri: {longest} gün")
+    print(f"Toplam çalışılan gün: {total_days}")
 
 
 def show_settings() -> None:
