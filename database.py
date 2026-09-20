@@ -91,3 +91,14 @@ def init_db() -> None:
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS review_log (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                word_id     INTEGER NOT NULL REFERENCES vocabulary (id),
+                review_date TEXT NOT NULL,
+                reviewed_at TEXT NOT NULL,
+                remembered  INTEGER NOT NULL
+            )
+            """
+        )

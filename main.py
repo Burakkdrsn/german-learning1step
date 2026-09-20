@@ -12,6 +12,7 @@ from models import Difficulty, Level, TaskCategory
 from services import (
     grammar_service,
     progress_service,
+    review_service,
     streak_service,
     task_service,
     vocabulary_service,
@@ -127,12 +128,18 @@ def _list_words() -> None:
 
 
 def _review_words() -> None:
+    limit = config.DAILY_REVIEW_LIMIT
+    remaining = limit - review_service.count_reviews_today()
+    if remaining <= 0:
+        print(f"\nBugünkü {limit} kelimelik limitini doldurdun. Yarın devam!")
+        return
+
     total_due = vocabulary_service.count_due_words()
     if total_due == 0:
         print("\nBugün tekrar edilecek kelime yok.")
         return
 
-    words = vocabulary_service.get_due_words(config.DAILY_REVIEW_LIMIT)
+    words = vocabulary_service.get_due_words(remaining)
     print(
         f"\nTekrar bekleyen {total_due} kelime var, "
         f"şimdi {len(words)} tanesini çalışacaksın."
@@ -148,7 +155,10 @@ def _review_words() -> None:
         answer = input("Hatırladın mı? (e/h, çıkmak için q): ").strip().lower()
         if answer == "q":
             break
-        vocabulary_service.review_word(word["id"], answer == "e")
+
+        remembered = answer == "e"
+        vocabulary_service.review_word(word["id"], remembered)
+        review_service.log_review(word["id"], remembered)
 
     print("\nTekrar bitti.")
 

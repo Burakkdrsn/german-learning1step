@@ -7,6 +7,7 @@ Ayrı bir tablo tutmuyoruz, tarihler tasks.completed_at'ten okunur.
 from datetime import date, timedelta
 
 from database import get_connection
+from services import review_service
 
 
 def _get_completed_days() -> set[date]:
@@ -19,7 +20,9 @@ def _get_completed_days() -> set[date]:
             WHERE is_completed = 1 AND completed_at IS NOT NULL
             """
         ).fetchall()
-    return {date.fromisoformat(row["day"]) for row in rows}
+        days = {date.fromisoformat(row["day"]) for row in rows}
+    return days | review_service.get_review_days()
+    
 
 
 def get_current_streak() -> int:

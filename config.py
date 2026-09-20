@@ -18,4 +18,4 @@ APP_TITLE: str = "GERMAN LEARNING TRACKER"
 MENU_WIDTH: int = 36
 
 # Bir kelime tekrar seansında gösterilecek en fazla kelime sayısı
-DAILY_REVIEW_LIMIT: int = 20
+DAILY_REVIEW_LIMIT: int = 3
